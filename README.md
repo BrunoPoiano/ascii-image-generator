@@ -4,22 +4,36 @@ Convert images into ASCII art using a web interface. Built using Go (Golang) and
 
 live version at [Demo](ascii-image-generator-two.vercel.app/).
 
-## Install
+![Screenshot of the App.](/src/assets/demo.png)
+
+## Installation
+
+Both options run on port 3000 | `localhost:3000`
+
+### Container
+```bash
+git clone git@github.com:BrunoPoiano/ascii-image-generator.git
+cd ascii-image-generator
+```
+```bash
+docker compose up -d 
+```
+
+### Node
 Clone the project
 
 ```bash
 git clone git@github.com:BrunoPoiano/ascii-image-generator.git
 cd ascii-image-generator
 ```
-### To run locally
 
 **Install dependencies**
 ```bash
 npm i
 ```
-**Start the Server on Port 3000**
+**Start the Server**
 ```bash
-node server.js
+npm run start
 ```
 
 ### Go Code Location
@@ -33,6 +47,13 @@ src/go/main.go
 GOOS=js GOARCH=wasm go build -o main.wasm
 ```
 
-## Ref
 
+## Ref
  - [Bild](https://github.com/anthonynsimon/bild)
+
+## Dependecies
+**Node version:** v20.0
+
+**Go version:** v1.23.5 
+
+

@@ -1,0 +1,8 @@
+
+services:
+  ascii_image_generator:
+    build: . 
+    ports:
+      - "3000:3000"
+    restart: unless-stopped
+  

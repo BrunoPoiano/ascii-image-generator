@@ -1,14 +1,14 @@
 {
-  "name": "webass",
+  "name": "ascii-image-generator",
   "version": "1.0.0",
   "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node server.js"
   },
-  "author": "",
+  "author": "Bruno Poiano",
   "license": "ISC",
-  "description": "",
+  "description": "Ascii image generator",
   "dependencies": {
     "express": "^4.21.2"
   }
