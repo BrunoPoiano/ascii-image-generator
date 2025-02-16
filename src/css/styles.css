@@ -290,8 +290,8 @@ section {
 
 #ascii-art {
   overflow: auto;
-  font-size: 7px;
-  line-height: 5px;
+  font-size: 12px;
+  line-height: 9px;
   font-family: "Courier New", Courier, monospace;
   white-space: pre;
 }
