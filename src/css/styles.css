@@ -289,7 +289,6 @@ section {
 }
 
 #ascii-art {
-  overflow: auto;
   font-size: 12px;
   line-height: 9px;
   font-family: "Courier New", Courier, monospace;

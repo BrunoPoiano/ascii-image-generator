@@ -38,6 +38,8 @@ type model struct {
 	effectsRateMap  map[string]bool
 	asciiChars      string
 	execChangeImage func()
+	lineHeight      int
+	fontSize        int
 }
 
 func main() {
@@ -53,6 +55,8 @@ func main() {
 		global:         g,
 		document:       g.Get("document"),
 		checkColor:     true,
+		lineHeight:     9,
+		fontSize:       12,
 	}
 
 	//Adding debounce to changeImage func
@@ -105,6 +109,10 @@ func (m *model) inputAsciiCheckboxChange(this js.Value, args []js.Value) interfa
 }
 
 func (m *model) fileChange(this js.Value, args []js.Value) interface{} {
+	if len(args) == 0 {
+		return nil
+	}
+
 	files := args[0].Get("target").Get("files")
 
 	if files.Length() > 0 {
@@ -115,12 +123,18 @@ func (m *model) fileChange(this js.Value, args []js.Value) interface{} {
 }
 
 func (m *model) inputTextAsciiChange(this js.Value, args []js.Value) interface{} {
+	if len(args) == 0 {
+		return nil
+	}
 	m.asciiChars = args[0].Get("target").Get("value").String()
 	m.execChangeImage()
 	return nil
 }
 
 func (m *model) selectAsciiChange(this js.Value, args []js.Value) interface{} {
+	if len(args) == 0 {
+		return nil
+	}
 	m.asciiChars = args[0].Get("target").Get("value").String()
 	m.document.Call("getElementById", "input-text-ascii").Set("value", m.asciiChars)
 	m.changeImage()
@@ -128,6 +142,10 @@ func (m *model) selectAsciiChange(this js.Value, args []js.Value) interface{} {
 }
 
 func (m *model) effectChange(this js.Value, args []js.Value) interface{} {
+	if len(args) == 0 {
+		return nil
+	}
+
 	m.effectSelected = args[0].Get("target").Get("value").String()
 	m.effectRange = 0
 
@@ -172,15 +190,34 @@ func (m model) updateEffectRange(min string, max string, step string) {
 }
 
 func (m *model) inputEffectRangeChange(this js.Value, args []js.Value) interface{} {
+
+	if len(args) == 0 {
+		return nil
+	}
+
 	value := args[0].Get("target").Get("value").String()
-	m.effectRange, _ = strconv.ParseFloat(value, 64)
+	var err error
+	m.effectRange, err = strconv.ParseFloat(value, 64)
+	if err != nil {
+		println("Error inputEffectRange")
+		return nil
+	}
 	m.execChangeImage()
 	return nil
 }
 
 func (m *model) inputZoomRangeChange(this js.Value, args []js.Value) interface{} {
+	if len(args) == 0 {
+		return nil
+	}
+
 	value := args[0].Get("target").Get("value").String()
-	m.imageWidth, _ = strconv.Atoi(value)
+	var err error
+	m.imageWidth, err = strconv.Atoi(value)
+	if err != nil {
+		println("Error inputZoomRange")
+		return nil
+	}
 	m.execChangeImage()
 	return nil
 }
@@ -263,10 +300,16 @@ func (m *model) imageEffectGenerator(img image.Image) {
 		canvas := m.document.Call("getElementById", "canvas")
 		drawImage := canvas.Call("getContext", "2d")
 
-		changeAttribute(canvas, "width", fmt.Sprintf("%d", image.Get("width").Int()))
-		changeAttribute(canvas, "height", fmt.Sprintf("%d", image.Get("height").Int()))
+		var imgWidth = image.Get("width")
+		var imgHeight = image.Get("height")
 
-		drawImage.Call("drawImage", image, 0, 0)
+		if !imgWidth.IsUndefined() && !imgWidth.IsNull() && !imgHeight.IsUndefined() && !imgHeight.IsNull() {
+
+			changeAttribute(canvas, "width", fmt.Sprintf("%d", imgWidth.Int()))
+			changeAttribute(canvas, "height", fmt.Sprintf("%d", imgHeight.Int()))
+
+			drawImage.Call("drawImage", image, 0, 0)
+		}
 		return nil
 	}))
 }
@@ -276,6 +319,8 @@ func (m *model) asciiGenerator(img image.Image) {
 
 	width, height := resizeImg(img, m.imageWidth)
 	resul := transform.Resize(img, width, height, transform.Linear)
+	fontSize, lineHeight := m.resizeAscii()
+	fontStyle := fmt.Sprintf("font-size:%dpx; line-height:%dpx", fontSize, lineHeight)
 	bounds := resul.Bounds()
 	var builder strings.Builder
 
@@ -292,11 +337,10 @@ func (m *model) asciiGenerator(img image.Image) {
 				r, g, b, _ := px.RGBA()
 
 				colorCSS := fmt.Sprintf("rgb(%d,%d,%d)", r>>8, g>>8, b>>8)
-				builder.WriteString(fmt.Sprintf(`<i style="color:%s">%c</i>`, colorCSS, density[int(charIndex)]))
+				builder.WriteString(fmt.Sprintf(`<i style="%s ; color:%s">%c</i>`, fontStyle, colorCSS, density[int(charIndex)]))
 			} else {
-				builder.WriteRune([]rune(string(density[int(charIndex)]))[0])
+				builder.WriteString(fmt.Sprintf(`<i style="%s">%c</i>`, fontStyle, density[int(charIndex)]))
 			}
-
 		}
 		builder.WriteRune('\n')
 	}
@@ -420,6 +464,21 @@ func (m model) applyEffects(img image.Image) image.Image {
 	}
 
 	return result
+}
+
+func (m model) resizeAscii() (int, int) {
+
+	imageDefaultSize := 100
+
+	lineHeightRatio := float64(m.lineHeight) / float64(m.fontSize)
+	inverseFactor := float64(imageDefaultSize) / float64(m.imageWidth)
+	newFontSize := float64(m.fontSize) * inverseFactor
+	newLineHeight := newFontSize * lineHeightRatio
+
+	newFontSize = math.Max(newFontSize, float64(m.fontSize))
+	newLineHeight = math.Max(newLineHeight, float64(m.lineHeight))
+
+	return int(newFontSize), int(newLineHeight)
 }
 
 func imageSize(img image.Image) (int, int) {
