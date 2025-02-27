@@ -54,6 +54,6 @@ GOOS=js GOARCH=wasm go build -o main.wasm
 ## Dependecies
 **Node version:** v20.0
 
-**Go version:** v1.23.5 
+**Go version:** v1.24
 
 

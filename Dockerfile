@@ -1,5 +1,5 @@
 
-from docker.io/library/golang:1.23.5 as builder 
+from docker.io/library/golang:1.24 as builder 
 workdir /ascii-image-generator
 copy ./ ./
 run cd ./src/go && go mod init ascii-generator && go mod tidy && GOOS=js GOARCH=wasm go build -o main.wasm main.go
