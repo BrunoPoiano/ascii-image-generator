@@ -1,15 +1,13 @@
+FROM docker.io/library/golang:1.24 as builder
+WORKDIR /ascii-image-generator
+COPY ./ ./
+RUN cd ./src/go && go mod init ascii-generator && go mod tidy && GOOS=js GOARCH=wasm go build -o main.wasm main.go
 
-from docker.io/library/golang:1.24 as builder 
-workdir /ascii-image-generator
-copy ./ ./
-run cd ./src/go && go mod init ascii-generator && go mod tidy && GOOS=js GOARCH=wasm go build -o main.wasm main.go
+FROM node:20-alpine
+WORKDIR /ascii-image-generator
+COPY ./ ./
+RUN npm install
 
-from node:20-alpine
-workdir /ascii-image-generator
-copy ./ ./
-run npm install
+EXPOSE 3000
 
-expose 3000
-
-cmd ["npm", "run", "start"]
-
+CMD ["npx", "serve", "src", "-l", "3000"]
