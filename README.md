@@ -46,5 +46,5 @@ npm run start
  - [Bild](https://github.com/anthonynsimon/bild)
 
 ## Dependecies
-**Node version:** v20.0
-**Go version:** v1.24
+- Node version: v20.0
+- Go version: v1.24
