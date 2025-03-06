@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>webAss</title>
   <script src="/js/wasm_exec.js"></script>
-  <script src="js/load_web_asm.js"></script>
+  <script src="js/index.js"></script>
   <link rel="stylesheet" href="css/styles.css">
 </head>
 
@@ -102,12 +102,13 @@
           <label for="input-range">Size</label>
           <input type="range" value="100" min="5" max="200" id="input-zoom-range">
         </div>
+        <div class="menu-item">
+          <button id="download-button">Download Image</button>
+        </div>
       </div>
     </div>
     <div class="images" id="content-div" data-loading="false">
       <canvas id="canvas"></canvas>
-      <pre id="ascii-art">
-      </pre>
     </div>
   </section>
 

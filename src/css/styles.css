@@ -119,6 +119,8 @@ textarea {
   font-size: inherit;
 }
 
+
+
 img {
   max-width: 100%;
   height: auto;
@@ -152,12 +154,16 @@ input[type="text"] {
 button {
   cursor: pointer;
   min-width: 10ch;
+  padding: 0.5rem 0.8rem;
+  border-radius: 5px;
+  border:0px;
+  outline:0px;
 
   --bg: #fff;
-  background: var(--bg);
-  /* This swaps between white or black based on the background color. */
-  /* After testing against all RGB background colors, 49.44 minimizes the number of WCAG 4.5:1 contrast failures. */
-  color: lch(from var(--bg) calc((49.44 - l) * infinity) 0 0);
+  background: var(--primary-color);
+
+  color: lch(from var(--primary-color) calc((49.44 - l) * infinity) 0 0);
+  font-weight: bold;
 }
 
 .title {
@@ -183,7 +189,6 @@ section {
   place-items: center;
   align-items: start;
   gap: 0.5rem;
-  overflow: auto;
   min-height: max(20rem, 100%);
 
   .loading {
