@@ -1,6 +1,6 @@
 # ASCII Image Generator with Golang & WebAssembly
 
-Convert images into ASCII art using a web interface. Built using Go (Golang) and WebAssembly (WASM) to execute in the client's browser, providing a fast and efficient way to generate ASCII art from an image.
+Image to ASCII Art Converter is a web-based tool that transforms images into ASCII art directly in the browser. Built with Go (Golang) and WebAssembly (WASM), it runs on the client side, ensuring fast processing without relying on a server. This approach enhances performance and privacy while providing a seamless user experience for generating ASCII art from any image.
 
 live version at [Demo](ascii-image-generator-two.vercel.app/).
 
@@ -33,7 +33,7 @@ docker compose up -d
 
 Compile the Go code into WebAssembly
 ```bash
-src/go/main.go
+cd src/go
 GOOS=js GOARCH=wasm go build -o main.wasm
 ```
 Install dependencies and start the server
