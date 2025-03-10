@@ -11,7 +11,8 @@ import (
 	"strconv"
 	"syscall/js"
 	"time"
-
+  
+  "main/effects"
 	"github.com/anthonynsimon/bild/adjust"
 	"github.com/anthonynsimon/bild/blend"
 	"github.com/anthonynsimon/bild/blur"
@@ -160,6 +161,8 @@ func (m *model) effectChange(this js.Value, args []js.Value) interface{} {
 			m.updateEffectRange("0", "1", "0.01")
 		case "shearH", "shearV":
 			m.updateEffectRange("0", "180", "1")
+		case "dithering":
+			m.updateEffectRange("2", "10", "1")
 		default:
 			inputRateRangeDiv := m.document.Call("getElementById", "input-rate-range-div")
 			changeAttribute(inputRateRangeDiv, "data-visible", "false")
@@ -349,6 +352,8 @@ func (m model) applyEffects(img image.Image) image.Image {
 	var result image.Image = img
 
 	switch m.effectSelected {
+	case "dithering":
+		result = effects.Dithering(result, "floyd-steinberg", int(m.effectRange))
 	case "gaussianBlur":
 		result = blur.Gaussian(result, float64(m.effectRange))
 	case "blur":
@@ -381,6 +386,7 @@ func (m model) applyEffects(img image.Image) image.Image {
 	case "gamma":
 		result = adjust.Gamma(result, float64(m.effectRange))
 	case "hue":
+
 		result = adjust.Hue(result, int(m.effectRange))
 	case "saturation":
 		result = adjust.Saturation(result, float64(m.effectRange))
