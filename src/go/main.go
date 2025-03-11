@@ -11,8 +11,9 @@ import (
 	"strconv"
 	"syscall/js"
 	"time"
-  
-  "main/effects"
+
+	"main/effects"
+
 	"github.com/anthonynsimon/bild/adjust"
 	"github.com/anthonynsimon/bild/blend"
 	"github.com/anthonynsimon/bild/blur"
@@ -39,7 +40,6 @@ type model struct {
 }
 
 func main() {
-
 	g := js.Global()
 	m := &model{
 		asciiChars:     "░▒▓█",
@@ -53,6 +53,14 @@ func main() {
 		checkColor:     true,
 		lineHeight:     9,
 		fontSize:       12,
+	}
+
+	navigator := g.Get("navigator")
+	gpu := navigator.Get("gpu")
+	if gpu.IsUndefined() {
+		println("WebGPU not supported")
+	} else {
+		println("WebGPU is available!")
 	}
 
 	//Adding debounce to changeImage func
@@ -152,9 +160,10 @@ func (m *model) effectChange(this js.Value, args []js.Value) interface{} {
 		case "brightness", "contrast", "saturation":
 			m.updateEffectRange("-1", "1", "0.1")
 		case "hue":
-			m.updateEffectRange("-360", "360", "1")
+			m.updateEffectRange("0", "360", "1")
 		case "gamma":
 			m.updateEffectRange("1", "5", "0.2")
+			m.effectRange = 1
 		case "threshold":
 			m.updateEffectRange("0", "200", "1")
 		case "noisePerlin":
@@ -163,6 +172,9 @@ func (m *model) effectChange(this js.Value, args []js.Value) interface{} {
 			m.updateEffectRange("0", "180", "1")
 		case "dithering":
 			m.updateEffectRange("2", "10", "1")
+		case "kuwahara":
+			m.updateEffectRange("1", "20", "2")
+			m.effectRange = 1
 		default:
 			inputRateRangeDiv := m.document.Call("getElementById", "input-rate-range-div")
 			changeAttribute(inputRateRangeDiv, "data-visible", "false")
@@ -175,7 +187,7 @@ func (m *model) effectChange(this js.Value, args []js.Value) interface{} {
 
 func (m model) updateEffectRange(min string, max string, step string) {
 	inputRange := m.document.Call("getElementById", "input-effect-range")
-	inputRange.Set("value", "0")
+	inputRange.Set("value", m.effectRange)
 	inputRange.Set("min", min)
 	inputRange.Set("max", max)
 	inputRange.Set("step", step)
@@ -352,8 +364,21 @@ func (m model) applyEffects(img image.Image) image.Image {
 	var result image.Image = img
 
 	switch m.effectSelected {
+	case "kuwahara":
+		result = effects.KuwaharaFilter(result, int(m.effectRange))
 	case "dithering":
 		result = effects.Dithering(result, "floyd-steinberg", int(m.effectRange))
+	case "hue":
+		result = effects.Hue(result, int(m.effectRange))
+	case "saturation":
+		result = effects.Saturation(result, float64(m.effectRange))
+	case "brightness":
+		result = effects.Luminance(result, float64(m.effectRange))
+	case "flipH":
+		result = effects.FlipHorizontal(result)
+	case "flipV":
+		result = effects.FlipVertical(result)
+
 	case "gaussianBlur":
 		result = blur.Gaussian(result, float64(m.effectRange))
 	case "blur":
@@ -378,24 +403,13 @@ func (m model) applyEffects(img image.Image) image.Image {
 		result = effect.Sharpen(result)
 	case "sobale":
 		result = effect.Sobel(result)
-
-	case "brightness":
-		result = adjust.Brightness(result, float64(m.effectRange))
 	case "contrast":
 		result = adjust.Contrast(result, float64(m.effectRange))
 	case "gamma":
 		result = adjust.Gamma(result, float64(m.effectRange))
-	case "hue":
-
-		result = adjust.Hue(result, int(m.effectRange))
-	case "saturation":
-		result = adjust.Saturation(result, float64(m.effectRange))
 	case "threshold":
 		result = segment.Threshold(result, uint8(m.effectRange))
-	case "flipH":
-		result = transform.FlipH(result)
-	case "flipV":
-		result = transform.FlipV(result)
+
 	case "shearH":
 		result = transform.ShearH(result, float64(m.effectRange))
 	case "shearV":
