@@ -1,8 +1,8 @@
 module main
 
-go 1.24.0
+go 1.24.1
 
 require (
-	github.com/anthonynsimon/bild v0.14.0
-	golang.org/x/image v0.24.0
+	github.com/BrunoPoiano/imgeffects v0.1.1 // indirect
+	github.com/anthonynsimon/bild v0.14.0 // indirect
 )

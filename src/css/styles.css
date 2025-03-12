@@ -156,8 +156,8 @@ button {
   min-width: 10ch;
   padding: 0.5rem 0.8rem;
   border-radius: 5px;
-  border:0px;
-  outline:0px;
+  border: 0px;
+  outline: 0px;
 
   --bg: #fff;
   background: var(--primary-color);
@@ -190,6 +190,7 @@ section {
   align-items: start;
   gap: 0.5rem;
   min-height: max(20rem, 100%);
+  overflow: auto;
 
   .loading {
     display: none;

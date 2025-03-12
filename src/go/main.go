@@ -12,11 +12,13 @@ import (
 	"syscall/js"
 	"time"
 
-	"main/effects"
-
+	"github.com/BrunoPoiano/imgeffects/blur"
+	"github.com/BrunoPoiano/imgeffects/dithering"
+	"github.com/BrunoPoiano/imgeffects/flip"
+	"github.com/BrunoPoiano/imgeffects/hsl"
+	"github.com/BrunoPoiano/imgeffects/kuwahara"
 	"github.com/anthonynsimon/bild/adjust"
 	"github.com/anthonynsimon/bild/blend"
-	"github.com/anthonynsimon/bild/blur"
 	"github.com/anthonynsimon/bild/effect"
 	"github.com/anthonynsimon/bild/noise"
 	"github.com/anthonynsimon/bild/segment"
@@ -53,14 +55,6 @@ func main() {
 		checkColor:     true,
 		lineHeight:     9,
 		fontSize:       12,
-	}
-
-	navigator := g.Get("navigator")
-	gpu := navigator.Get("gpu")
-	if gpu.IsUndefined() {
-		println("WebGPU not supported")
-	} else {
-		println("WebGPU is available!")
 	}
 
 	//Adding debounce to changeImage func
@@ -172,6 +166,9 @@ func (m *model) effectChange(this js.Value, args []js.Value) interface{} {
 			m.updateEffectRange("0", "180", "1")
 		case "dithering":
 			m.updateEffectRange("2", "10", "1")
+		case "gaussianBlur":
+			m.updateEffectRange("0", "20", "1")
+			m.effectRange = 1
 		case "kuwahara":
 			m.updateEffectRange("1", "20", "2")
 			m.effectRange = 1
@@ -365,24 +362,22 @@ func (m model) applyEffects(img image.Image) image.Image {
 
 	switch m.effectSelected {
 	case "kuwahara":
-		result = effects.KuwaharaFilter(result, int(m.effectRange))
+		result = kuwahara.KuwaharaFilter(result, int(m.effectRange))
 	case "dithering":
-		result = effects.Dithering(result, "floyd-steinberg", int(m.effectRange))
+		result = dithering.OrderedDithering(result, int(m.effectRange), 2)
 	case "hue":
-		result = effects.Hue(result, int(m.effectRange))
+		result = hsl.Hue(result, int(m.effectRange))
 	case "saturation":
-		result = effects.Saturation(result, float64(m.effectRange))
+		result = hsl.Saturation(result, float64(m.effectRange))
 	case "brightness":
-		result = effects.Luminance(result, float64(m.effectRange))
+		result = hsl.Luminance(result, float64(m.effectRange))
 	case "flipH":
-		result = effects.FlipHorizontal(result)
+		result = flip.FlipHorizontal(result)
 	case "flipV":
-		result = effects.FlipVertical(result)
-
+		result = flip.FlipVertical(result)
 	case "gaussianBlur":
-		result = blur.Gaussian(result, float64(m.effectRange))
-	case "blur":
-		result = blur.Box(result, float64(m.effectRange))
+		result = blur.GaussianBlur(result, int(m.effectRange))
+
 	case "Dilate":
 		result = effect.Dilate(result, float64(m.effectRange))
 	case "edgeDetection":
@@ -469,7 +464,7 @@ func changeAttribute(content js.Value, attribute string, value string) {
 }
 
 func effectsRateMapFunc() map[string]bool {
-	effects := []string{"gaussianBlur", "blur", "Dilate", "edgeDetection", "erode", "median"}
+	effects := []string{"blur", "Dilate", "edgeDetection", "erode", "median"}
 	effectsMap := make(map[string]bool)
 	for _, effect := range effects {
 		effectsMap[effect] = true
