@@ -17,6 +17,7 @@ import (
 	"github.com/BrunoPoiano/imgeffects/flip"
 	"github.com/BrunoPoiano/imgeffects/hsl"
 	"github.com/BrunoPoiano/imgeffects/kuwahara"
+	"github.com/BrunoPoiano/imgeffects/resize"
 	"github.com/anthonynsimon/bild/adjust"
 	"github.com/anthonynsimon/bild/blend"
 	"github.com/anthonynsimon/bild/effect"
@@ -319,8 +320,8 @@ func (m *model) imageEffectGenerator(img image.Image) {
 func (m *model) asciiGenerator(img image.Image) {
 	density := []rune(m.asciiChars)
 
-	width, height := resizeImg(img, m.imageWidth)
-	resul := transform.Resize(img, width, height, transform.Linear)
+	width, height := resize.NewAspectRatio(img, m.imageWidth)
+	resul := resize.BypolarInterpolate(img, width, height)
 	fontSize, lineHeight := m.resizeAscii()
 	bounds := resul.Bounds()
 
@@ -449,14 +450,6 @@ func (m model) resizeAscii() (int, int) {
 func imageSize(img image.Image) (int, int) {
 	imgBounds := img.Bounds()
 	return imgBounds.Dx(), imgBounds.Dy()
-}
-
-func resizeImg(img image.Image, newWidth int) (int, int) {
-	imgBounds := img.Bounds()
-	aspectRatio := float64(newWidth) / float64(imgBounds.Dx())
-	newHeight := int(float64(imgBounds.Dy()) * aspectRatio)
-
-	return newWidth, newHeight
 }
 
 func changeAttribute(content js.Value, attribute string, value string) {

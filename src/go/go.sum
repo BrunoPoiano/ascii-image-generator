@@ -2,6 +2,8 @@ github.com/BrunoPoiano/imgeffects v0.1.0 h1:+hOEOXx+4G4OrQ4vm7PlTsJdMNHTOs/ewj2/
 github.com/BrunoPoiano/imgeffects v0.1.0/go.mod h1:spJpnd09LTttYchBxkzt5O1CLH8+u+ki8dNAZzQ6/Ok=
 github.com/BrunoPoiano/imgeffects v0.1.1 h1:BBxG195CJtutYLDEBY3T5pQ3SxodHBRdIv+fsX27TV0=
 github.com/BrunoPoiano/imgeffects v0.1.1/go.mod h1:y4JW4x4hIfuKUEPkmrTCDg8WB6tvpxb7/gl++f2cSJw=
+github.com/BrunoPoiano/imgeffects v0.2.1 h1:qdcwOWrUAJ+UicDTTkkt6Jea6xgcWpIdqZjthkQwVLk=
+github.com/BrunoPoiano/imgeffects v0.2.1/go.mod h1:y4JW4x4hIfuKUEPkmrTCDg8WB6tvpxb7/gl++f2cSJw=
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
 github.com/anthonynsimon/bild v0.14.0 h1:IFRkmKdNdqmexXHfEU7rPlAmdUZ8BDZEGtGHDnGWync=
 github.com/anthonynsimon/bild v0.14.0/go.mod h1:hcvEAyBjTW69qkKJTfpcDQ83sSZHxwOunsseDfeQhUs=
