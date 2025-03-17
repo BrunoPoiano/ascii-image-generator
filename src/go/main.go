@@ -379,6 +379,9 @@ func (m model) applyEffects(img image.Image) image.Image {
 	case "gaussianBlur":
 		result = blur.GaussianBlur(result, int(m.effectRange))
 
+	case "contrast":
+		result = adjust.Contrast(result, float64(m.effectRange))
+
 	case "Dilate":
 		result = effect.Dilate(result, float64(m.effectRange))
 	case "edgeDetection":
@@ -399,8 +402,6 @@ func (m model) applyEffects(img image.Image) image.Image {
 		result = effect.Sharpen(result)
 	case "sobale":
 		result = effect.Sobel(result)
-	case "contrast":
-		result = adjust.Contrast(result, float64(m.effectRange))
 	case "gamma":
 		result = adjust.Gamma(result, float64(m.effectRange))
 	case "threshold":
