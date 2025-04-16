@@ -43,7 +43,7 @@ npm run start
 ```
 
 ## Ref
- - [Bild](https://github.com/anthonynsimon/bild)
+ - [Effects](https://github.com/BrunoPoiano/imgeffects)
 
 ## Dependecies
 - Node version: v20.0

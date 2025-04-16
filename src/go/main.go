@@ -13,17 +13,16 @@ import (
 	"time"
 
 	"github.com/BrunoPoiano/imgeffects/blur"
+	"github.com/BrunoPoiano/imgeffects/contrast"
 	"github.com/BrunoPoiano/imgeffects/dithering"
+	edgedetection "github.com/BrunoPoiano/imgeffects/edgeDetection"
+	"github.com/BrunoPoiano/imgeffects/filter"
 	"github.com/BrunoPoiano/imgeffects/flip"
 	"github.com/BrunoPoiano/imgeffects/hsl"
-	"github.com/BrunoPoiano/imgeffects/kuwahara"
+	"github.com/BrunoPoiano/imgeffects/lines"
+	"github.com/BrunoPoiano/imgeffects/pointillism"
 	"github.com/BrunoPoiano/imgeffects/resize"
-	"github.com/anthonynsimon/bild/adjust"
-	"github.com/anthonynsimon/bild/blend"
-	"github.com/anthonynsimon/bild/effect"
-	"github.com/anthonynsimon/bild/noise"
-	"github.com/anthonynsimon/bild/segment"
-	"github.com/anthonynsimon/bild/transform"
+	"github.com/BrunoPoiano/imgeffects/threshold"
 )
 
 type model struct {
@@ -32,6 +31,7 @@ type model struct {
 	effectRange     float64
 	checkAscii      bool
 	checkColor      bool
+	checkInvert     bool
 	imageSelected   js.Value
 	global          js.Value
 	document        js.Value
@@ -50,6 +50,7 @@ func main() {
 		effectRange:    0,
 		effectSelected: "",
 		checkAscii:     false,
+		checkInvert:    false,
 		effectsRateMap: effectsRateMapFunc(),
 		global:         g,
 		document:       g.Get("document"),
@@ -64,6 +65,7 @@ func main() {
 	})
 
 	//getting elements
+	inputCheckboxInvert := m.document.Call("getElementById", "input-checkbox-invert")
 	inputCheckboxAscii := m.document.Call("getElementById", "input-checkbox-ascii")
 	inputCheckboxColor := m.document.Call("getElementById", "input-checkbox-color")
 	inputEffectRange := m.document.Call("getElementById", "input-effect-range")
@@ -74,6 +76,7 @@ func main() {
 	inputFile := m.document.Call("getElementById", "input-file")
 
 	//adding reactivity
+	inputCheckboxInvert.Call("addEventListener", "input", js.FuncOf(m.inputAsciiCheckboxInvert))
 	inputCheckboxAscii.Call("addEventListener", "input", js.FuncOf(m.inputAsciiCheckboxChange))
 	inputCheckboxColor.Call("addEventListener", "input", js.FuncOf(m.inputAsciiCheckboxColor))
 	inputEffectRange.Call("addEventListener", "input", js.FuncOf(m.inputEffectRangeChange))
@@ -84,6 +87,7 @@ func main() {
 	inputFile.Call("addEventListener", "input", js.FuncOf(m.fileChange))
 
 	//setting default value
+	inputCheckboxInvert.Set("checked", m.checkInvert)
 	inputCheckboxAscii.Set("checked", m.checkAscii)
 	inputCheckboxColor.Set("checked", m.checkColor)
 	inputEffectRange.Set("value", m.effectRange)
@@ -93,6 +97,22 @@ func main() {
 	selectAscii.Set("value", m.asciiChars)
 
 	select {}
+}
+
+func (m *model) inputAsciiCheckboxInvert(this js.Value, args []js.Value) interface{} {
+	m.checkInvert = this.Get("checked").Bool()
+	chars := []rune(m.asciiChars)
+
+	for i, j := 0, len(chars)-1; i < j; i, j = i+1, j-1 {
+		chars[i], chars[j] = chars[j], chars[i]
+	}
+
+	charsInverted := string(chars)
+
+	m.asciiChars = string(charsInverted)
+	m.document.Call("getElementById", "input-text-ascii").Set("value", charsInverted)
+	m.execChangeImage()
+	return nil
 }
 
 func (m *model) inputAsciiCheckboxColor(this js.Value, args []js.Value) interface{} {
@@ -148,35 +168,31 @@ func (m *model) effectChange(this js.Value, args []js.Value) interface{} {
 	m.effectSelected = args[0].Get("target").Get("value").String()
 	m.effectRange = 0
 
-	if m.effectsRateMap[m.effectSelected] {
+	switch m.effectSelected {
+	case "ditheringError", "threshold":
 		m.updateEffectRange("0", "10", "1")
-	} else {
-		switch m.effectSelected {
-		case "brightness", "contrast", "saturation":
-			m.updateEffectRange("-1", "1", "0.1")
-		case "hue":
-			m.updateEffectRange("0", "360", "1")
-		case "gamma":
-			m.updateEffectRange("1", "5", "0.2")
-			m.effectRange = 1
-		case "threshold":
-			m.updateEffectRange("0", "200", "1")
-		case "noisePerlin":
-			m.updateEffectRange("0", "1", "0.01")
-		case "shearH", "shearV":
-			m.updateEffectRange("0", "180", "1")
-		case "dithering":
-			m.updateEffectRange("2", "10", "1")
-		case "gaussianBlur":
-			m.updateEffectRange("0", "20", "1")
-			m.effectRange = 1
-		case "kuwahara":
-			m.updateEffectRange("1", "20", "2")
-			m.effectRange = 1
-		default:
-			inputRateRangeDiv := m.document.Call("getElementById", "input-rate-range-div")
-			changeAttribute(inputRateRangeDiv, "data-visible", "false")
-		}
+	case "pointillismLuminanceGridBased":
+		m.updateEffectRange("2", "10", "1")
+		m.effectRange = 2
+	case "gaussianBlur", "medianBlur", "contrastUnsharpMasking", "ditheringOrdered", "halftone", "pointilismGridBased", "lineHorizontal", "linesVertical", "linesDiagonal":
+		m.updateEffectRange("0", "20", "1")
+		m.effectRange = 1
+	case "brightness", "contrast", "saturation":
+		m.updateEffectRange("-1", "1", "0.1")
+	case "voronoi":
+		m.updateEffectRange("5", "1000", "1")
+		m.effectRange = 5
+	case "hue":
+		m.updateEffectRange("0", "360", "1")
+	case "thresholdSimple", "solarize":
+		m.updateEffectRange("1", "100", "1")
+		m.effectRange = 1
+	case "kuwahara":
+		m.updateEffectRange("1", "20", "2")
+		m.effectRange = 1
+	default:
+		inputRateRangeDiv := m.document.Call("getElementById", "input-rate-range-div")
+		changeAttribute(inputRateRangeDiv, "data-visible", "false")
 	}
 
 	m.changeImage()
@@ -362,72 +378,60 @@ func (m model) applyEffects(img image.Image) image.Image {
 	var result image.Image = img
 
 	switch m.effectSelected {
-	case "kuwahara":
-		result = kuwahara.KuwaharaFilter(result, int(m.effectRange))
-	case "dithering":
-		result = dithering.OrderedDithering(result, int(m.effectRange), 2)
+
+	case "medianBlur":
+		result = blur.Median(result, int(m.effectRange))
+	case "gaussianBlur":
+		result = blur.GaussianBlur(result, int(m.effectRange))
+
+	case "contrastUnsharpMasking":
+		result = contrast.UnsharpMasking(result, 1.0, int(m.effectRange))
+
+	case "ditheringError":
+		result = dithering.ErrorDifusionDithering(result, "sierra", int(m.effectRange))
+	case "ditheringOrdered":
+		result = dithering.OrderedDithering(result, int(m.effectRange), 4)
+
 	case "hue":
 		result = hsl.Hue(result, int(m.effectRange))
 	case "saturation":
 		result = hsl.Saturation(result, float64(m.effectRange))
 	case "brightness":
 		result = hsl.Luminance(result, float64(m.effectRange))
+
+	case "threshold":
+		result = threshold.MultiThresholdColor(result, int(m.effectRange))
+	case "thresholdSimple":
+		result = threshold.GlobalThreshold(result, int(m.effectRange))
+
+	case "edgeDetection":
+		result = edgedetection.DifferenceOfGaussians(result, 5, 10)
+
+	case "halftone":
+		result = pointillism.Halftone(result, int(m.effectRange), true)
+	case "pointilismGridBased":
+		result = pointillism.PointillismGridBased(result, int(m.effectRange))
+	case "pointillismLuminanceGridBased":
+		result = pointillism.PointillismLuminanceGridBased(result, int(m.effectRange), "up")
+
+	case "voronoi":
+		result = filter.VoronoiPixelation(result, int(m.effectRange))
+	case "solarize":
+		result = filter.SolarizeEffect(result, int(m.effectRange))
+	case "kuwahara":
+		result = filter.KuwaharaFilter(result, int(m.effectRange))
+
+	case "lineHorizontal":
+		result = lines.LinesHorizontal(result, int(m.effectRange), true)
+	case "linesVertical":
+		result = lines.LinesVertical(result, int(m.effectRange), true)
+	case "linesDiagonal":
+		result = lines.LinesDiagonal(result, int(m.effectRange), true)
+
 	case "flipH":
 		result = flip.FlipHorizontal(result)
 	case "flipV":
 		result = flip.FlipVertical(result)
-	case "gaussianBlur":
-		result = blur.GaussianBlur(result, int(m.effectRange))
-
-	case "contrast":
-		result = adjust.Contrast(result, float64(m.effectRange))
-
-	case "Dilate":
-		result = effect.Dilate(result, float64(m.effectRange))
-	case "edgeDetection":
-		result = effect.EdgeDetection(result, float64(m.effectRange))
-	case "emboss":
-		result = effect.Emboss(result)
-	case "erode":
-		result = effect.Erode(result, float64(m.effectRange))
-	case "grayscale":
-		result = effect.Grayscale(result)
-	case "invert":
-		result = effect.Invert(result)
-	case "median":
-		result = effect.Median(result, float64(m.effectRange))
-	case "sepia":
-		result = effect.Sepia(result)
-	case "sharpen":
-		result = effect.Sharpen(result)
-	case "sobale":
-		result = effect.Sobel(result)
-	case "gamma":
-		result = adjust.Gamma(result, float64(m.effectRange))
-	case "threshold":
-		result = segment.Threshold(result, uint8(m.effectRange))
-
-	case "shearH":
-		result = transform.ShearH(result, float64(m.effectRange))
-	case "shearV":
-		result = transform.ShearV(result, float64(m.effectRange))
-
-	case "noiseUniformColored":
-		imgBounds := result.Bounds()
-		noise := noise.Generate(imgBounds.Dx(), imgBounds.Dy(), &noise.Options{Monochrome: false, NoiseFn: noise.Uniform})
-		result = blend.Overlay(noise, result)
-	case "noiseBinaryMonochrome":
-		imgBounds := result.Bounds()
-		noise := noise.Generate(imgBounds.Dx(), imgBounds.Dy(), &noise.Options{Monochrome: true, NoiseFn: noise.Binary})
-		result = blend.Opacity(noise, result, 0.5)
-	case "noiseGaussianMonochrome":
-		imgBounds := result.Bounds()
-		noise := noise.Generate(imgBounds.Dx(), imgBounds.Dy(), &noise.Options{Monochrome: true, NoiseFn: noise.Gaussian})
-		result = blend.Overlay(noise, result)
-	case "noisePerlin":
-		imgBounds := result.Bounds()
-		noise := noise.GeneratePerlin(imgBounds.Dx(), imgBounds.Dy(), m.effectRange)
-		result = blend.Overlay(noise, result)
 	}
 
 	return result

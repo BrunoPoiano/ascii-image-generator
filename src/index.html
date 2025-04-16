@@ -25,36 +25,42 @@
       <div class="menu-item">
         <label for="select-effect">Effects</label>
         <select id="select-effect">
+
           <option value="" selected>None</option>
-          <option value="kuwahara">Kuwahara</option>
-          <option value="dithering">Dithering</option>
+          <option value="medianBlur">Median Blur</option>
           <option value="gaussianBlur">Gaussian Blur</option>
-          <option value="dilate">Dilate</option>
+
+          <option value="contrastUnsharpMasking">Unsharp Masking</option>
+
+          <option value="ditheringError">Dithering Error Based</option>
+          <option value="ditheringOrdered">Dithering Ordered Based</option>
+
+          <option value="hue">Hue</option>
+          <option value="saturation">Saturation</option>
+          <option value="brightness">Brightness</option>
+
+          <option value="threshold">Color Threshold</option>
+          <option value="thresholdSimple">Simple Threshold</option>
+
           <option value="edgeDetection">Edge Detection</option>
-          <option value="emboss">emboss</option>
-          <option value="erode">erode</optionresult>
-          <option value="grayscale">grayscale</option>
-          <option value="invert">invert</option>
-          <!--<option value="median">median</option>-->
-          <option value="sepia">sepia</option>
-          <option value="sharpen">sharpen</option>
-          <option value="sobale">sobale</option>
-          <option value="brightness">brightness</option>
-          <option value="contrast">contrast</option>
-          <option value="gamma">gamma</option>
-          <option value="hue">hue</option>
-          <option value="saturation">saturation</option>
-          <option value="threshold">threshold</option>
-          <option value="flipH">flip horizontal</option>
-          <option value="flipV">flip vertical</option>
-          <option value="shearH">shear Horizontal</option>
-          <option value="shearV">shear Vertical</option>
-          <option value="noiseUniformColored">noise uniform colored</option>
-          <option value="noiseBinaryMonochrome">noise binary monochrome</option>
-          <option value="noiseGaussianMonochrome">noise gaussian monochrome</option>
-          <option value="noisePerlin">noise perlin</option>
+
+          <option value="halftone">Halftone</option>
+          <option value="pointilismGridBased">Pointilism</option>
+          <option value="pointillismLuminanceGridBased">Brush Effect</option>
+
+          <option value="voronoi">Voronoi</option>
+          <option value="solarize">Solarize</option>
+          <option value="kuwahara">Kuwahara</option>
+
+          <option value="lineHorizontal">Lines Horizontal</option>
+          <option value="linesVertical">Lines Vertical</option>
+          <option value="linesDiagonal">Lines Diagonal</option>
+
+          <option value="flipH">Flip Horizontal</option>
+          <option value="flipV">Flip Vertical</option>
         </select>
       </div>
+      <small>*Some effects may take longer to apply*</small>
 
       <div class="menu-item" id="input-rate-range-div" data-visible="false" data-min="0" data-max="10">
         <label for="input-effect-range">Intensity</label>
@@ -69,7 +75,7 @@
       <div class="menu" id="ascii-div" data-visible="false">
         <div class="menu-item-checkbox">
           <input type="checkbox" id="input-checkbox-color">
-          <label for="input-checkbox-ascii">Color</label>
+          <label for="input-checkbox-color">Color</label>
         </div>
         <div class="menu-item">
           <label for="select-ascii">Preset Ascii</label>
@@ -78,26 +84,30 @@
             <option value="Ñ@#W$9876543210?!abc;:+=-,._ ">Dense</option>
             <option value=" ,(S#g@">Simple</option>
             <option value="#@$%&?!/;:,. ">High Contrast</option>
-            <option value="@░. ">Minimal</option>
+            <option value=" .:coPO?@█">Basic</option>
+            <option value="█@:. ">Minimal</option>
             <option value="@#%+= ">Minimalist</option>
             <option value="░▒▓█">Blocks</option>
-            <option value="█▓▒░">Blocks Inverted</option>
             <option value="░▒▓█▀▄">Blocks Shadow</option>
             <option value="█▓▒░+=:. ">Blocks + characters</option>
             <option value="╔╗╚╝║═╠╣╦╩╬">Box</option>
             <option value="@#$%&. ">Matrix Style</option>
             <option value="⌂∆◊○□△▽∩">Technical</option>
             <option value="█▀▄▌▐░▒▓■● ">Geometric</option>
-            <option value="●◉○◎· ">Dots</option>
+            <option value="●◉◎○· ">Dots</option>
             <option value="┋┇┊┆">Dotted Lines</option>
             <option value="║│┃┆┇┊┋╵">Lines</option>
             <option value="❄❅❆✻✺· ">Snow</option>
-            <option value="≋≈≌∼∽">Wave</option>
+            <option value="≌≋≈∼∽">Wave</option>
           </select>
         </div>
         <div class="menu-item">
           <label for="input-effect-range">Ascii Characters</label>
           <input type="text" id="input-text-ascii">
+        </div>
+        <div class="menu-item-checkbox">
+          <input type="checkbox" id="input-checkbox-invert">
+          <label for="input-checkbox-invert">Invert Characters</label>
         </div>
         <div class="menu-item">
           <label for="input-range">Size</label>
